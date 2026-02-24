@@ -78,18 +78,34 @@
                     <input type="number" id="salary" placeholder="例如：17000" value="17000">
                 </div>
                 <div class="form-group">
-                    <label for="month">選擇月份 Select Month</label>
-                    <select id="month">
-                        <option value="6">2025 年 6 月 June 2025</option>
-                        <option value="7">2025 年 7 月 July 2025</option>
-                        <option value="8">2025 年 8 月 August 2025</option>
-                        <option value="9">2025 年 9 月 September 2025</option>
-                        <option value="10" selected>2025 年 10 月 October 2025</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="position">職位 Position</label>
                     <input type="text" id="position" placeholder="例如：全職員工" value="全職員工">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="font-weight: 600; color: #2c3e50; margin-bottom: 10px; display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">選擇月份 Select Months (可多選 Multi-select)</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="6" checked> <span>2025 年 6 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="7" checked> <span>2025 年 7 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="8" checked> <span>2025 年 8 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="9" checked> <span>2025 年 9 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="10" checked> <span>2025 年 10 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="11"> <span>2025 年 11 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="12"> <span>2025 年 12 月</span>
+                    </label>
                 </div>
             </div>
             <div class="checkbox-group">
@@ -185,14 +201,18 @@
             '7': '2025 年 7 月 July 2025',
             '8': '2025 年 8 月 August 2025',
             '9': '2025 年 9 月 September 2025',
-            '10': '2025 年 10 月 October 2025'
+            '10': '2025 年 10 月 October 2025',
+            '11': '2025 年 11 月 November 2025',
+            '12': '2025 年 12 月 December 2025'
         };
         const monthDays = {
             '6': '2025 年 6 月 30 日',
             '7': '2025 年 7 月 31 日',
             '8': '2025 年 8 月 31 日',
             '9': '2025 年 9 月 30 日',
-            '10': '2025 年 10 月 31 日'
+            '10': '2025 年 10 月 31 日',
+            '11': '2025 年 11 月 30 日',
+            '12': '2025 年 12 月 31 日'
         };
         function formatMoney(amount) {
             return amount.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -200,36 +220,139 @@
         function generatePayslip() {
             const name = document.getElementById('employeeName').value || '何燕';
             const salary = parseFloat(document.getElementById('salary').value) || 17000;
-            const month = document.getElementById('month').value;
             const position = document.getElementById('position').value || '全職員工';
             const hasMPF = document.getElementById('mpfCheck').checked;
-            document.getElementById('displayName').textContent = name;
-            document.getElementById('displayMonth').textContent = monthNames[month];
-            document.getElementById('displayPosition').textContent = position;
-            document.getElementById('displayDate').textContent = monthDays[month];
-            document.getElementById('generatedDate').textContent = 'Generated on ' + new Date().toLocaleDateString('en-HK');
-            let mpfAmount = 0;
-            let netSalary = salary;
-            if (hasMPF && salary >= 7100) {
-                mpfAmount = salary * 0.05;
-                netSalary = salary - mpfAmount;
+            
+            // 獲取所有已選月份
+            const selectedMonths = Array.from(document.querySelectorAll('.month-check:checked')).map(cb => cb.value);
+            
+            if (selectedMonths.length === 0) {
+                alert('請至少選擇一個月份！');
+                return;
             }
-            let tableHTML = `<tr><td>基本薪金 Basic Salary</td><td class="amount positive">${formatMoney(salary)}</td></tr>`;
-            if (hasMPF && salary >= 7100) {
-                tableHTML += `<tr><td>強積金供款 (僱員部分) MPF Contribution (Employee)</td><td class="amount negative">- ${formatMoney(mpfAmount)}</td></tr>`;
+            
+            let allPayslips = '';
+            let totalSalary = 0;
+            let totalMPF = 0;
+            let totalNet = 0;
+            
+            selectedMonths.forEach(month => {
+                const mpfAmount = (hasMPF && salary >= 7100) ? salary * 0.05 : 0;
+                const netSalary = salary - mpfAmount;
+                
+                totalSalary += salary;
+                totalMPF += mpfAmount;
+                totalNet += netSalary;
+                
+                allPayslips += `
+                <div class="payslip-container" style="display: block; margin-bottom: 40px;">
+                    <div class="payslip-header">
+                        <div class="stamp">已審核<br>APPROVED</div>
+                        <div class="company-info">
+                            <h2>木本部有限公司</h2>
+                            <p>Mokuhonbu Limited</p>
+                        </div>
+                        <div class="payslip-title">糧單 PAYSLIP - ${monthNames[month]}</div>
+                    </div>
+                    <div class="payslip-content">
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <div class="info-label">員工姓名 Employee Name</div>
+                                <div class="info-value">${name}</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">糧期 Payroll Period</div>
+                                <div class="info-value">${monthNames[month]}</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">職位 Position</div>
+                                <div class="info-value">${position}</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">發薪日期 Payment Date</div>
+                                <div class="info-value">${monthDays[month]}</div>
+                            </div>
+                        </div>
+                        <table class="salary-table">
+                            <thead>
+                                <tr>
+                                    <th>項目 Item</th>
+                                    <th style="text-align: right;">金額 Amount (HK$)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>基本薪金 Basic Salary</td><td class="amount positive">${formatMoney(salary)}</td></tr>
+                                ${hasMPF && salary >= 7100 ? `<tr><td>強積金供款 (僱員部分) MPF Contribution (Employee)</td><td class="amount negative">- ${formatMoney(mpfAmount)}</td></tr>` : ''}
+                                <tr class="total-row"><td>實發薪金 Net Pay</td><td class="amount">${formatMoney(netSalary)}</td></tr>
+                            </tbody>
+                        </table>
+                        ${hasMPF && salary >= 7100 ? `
+                        <div class="mpf-section" style="display: block;">
+                            <div class="mpf-title">
+                                <span>💰</span>
+                                <span>強制性公積金供款詳情 Mandatory Provident Fund Details</span>
+                            </div>
+                            <div class="mpf-grid">
+                                <div class="mpf-item">
+                                    <div class="mpf-label">僱員供款 Employee Contribution</div>
+                                    <div class="mpf-value">$${formatMoney(mpfAmount)} (5%)</div>
+                                </div>
+                                <div class="mpf-item">
+                                    <div class="mpf-label">僱主供款 Employer Contribution</div>
+                                    <div class="mpf-value">$${formatMoney(mpfAmount)} (5%)</div>
+                                </div>
+                                <div class="mpf-item">
+                                    <div class="mpf-label">供款基數 Contribution Base</div>
+                                    <div class="mpf-value">$${formatMoney(salary)}</div>
+                                </div>
+                                <div class="mpf-item">
+                                    <div class="mpf-label">總供款額 Total Contribution</div>
+                                    <div class="mpf-value">$${formatMoney(mpfAmount * 2)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="footer-note">
+                            <strong style="color: #2e7d32;">備註 Remarks：</strong><br>
+                            <span style="color: #555; font-size: 14px;">
+                                此糧單為機密文件，請妥善保管。<br>
+                                This payslip is confidential. Please keep it in a safe place.<br>
+                                如有疑問，請聯絡人力資源部。
+                            </span>
+                        </div>
+                    </div>
+                    <div class="payslip-footer">
+                        <p>木本部有限公司 Mokuhonbu Limited</p>
+                        <p>此糧單由電腦系統生成，無需簽署 | Generated by Computer System</p>
+                        <p style="margin-top: 10px; font-size: 10px;">Generated on ${new Date().toLocaleDateString('en-HK')}</p>
+                    </div>
+                </div>
+                `;
+            });
+            
+            // 添加總結表格
+            if (selectedMonths.length > 1) {
+                allPayslips += `
+                <div class="form-section" style="margin-top: 40px;">
+                    <h2 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">📊 總結 Summary (${selectedMonths.length} 個月)</h2>
+                    <table class="salary-table">
+                        <thead>
+                            <tr>
+                                <th>項目 Item</th>
+                                <th style="text-align: right;">總金額 Total Amount (HK$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>總薪金 Gross Salary</td><td class="amount positive">${formatMoney(totalSalary)}</td></tr>
+                            ${hasMPF && salary >= 7100 ? `<tr><td>總強積金 (僱員) Total MPF (Employee)</td><td class="amount negative">- ${formatMoney(totalMPF)}</td></tr>` : ''}
+                            <tr class="total-row"><td>總實發 Total Net Pay</td><td class="amount">${formatMoney(totalNet)}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                `;
             }
-            tableHTML += `<tr class="total-row"><td>實發薪金 Net Pay</td><td class="amount">${formatMoney(netSalary)}</td></tr>`;
-            document.getElementById('salaryBody').innerHTML = tableHTML;
-            const mpfSection = document.getElementById('mpfSection');
-            if (hasMPF && salary >= 7100) {
-                mpfSection.style.display = 'block';
-                document.getElementById('mpfEmployee').textContent = '$' + formatMoney(mpfAmount) + ' (5%)';
-                document.getElementById('mpfEmployer').textContent = '$' + formatMoney(mpfAmount) + ' (5%)';
-                document.getElementById('mpfBase').textContent = '$' + formatMoney(salary);
-                document.getElementById('mpfTotal').textContent = '$' + formatMoney(mpfAmount * 2);
-            } else {
-                mpfSection.style.display = 'none';
-            }
+            
+            document.getElementById('payslipResult').innerHTML = allPayslips;
             document.getElementById('payslipResult').style.display = 'block';
             document.getElementById('payslipResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
