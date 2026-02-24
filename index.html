@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>木本部有限公司 - 糧單生成器</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@300;400;500;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans HK', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 30px; padding: 20px; }
+        .header h1 { font-size: 36px; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .header p { opacity: 0.9; font-size: 16px; }
+        .form-section { background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 25px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-weight: 600; color: #2c3e50; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select { padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; transition: all 0.3s; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .checkbox-group { display: flex; align-items: center; gap: 12px; padding: 15px; background: #f8f9fa; border-radius: 10px; border: 2px solid #e0e0e0; }
+        .checkbox-group input[type="checkbox"] { width: 24px; height: 24px; cursor: pointer; accent-color: #667eea; }
+        .checkbox-group label { font-weight: 600; color: #2c3e50; cursor: pointer; font-size: 16px; }
+        .btn-generate { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 18px 40px; font-size: 18px; font-weight: 700; border-radius: 12px; cursor: pointer; width: 100%; transition: transform 0.2s, box-shadow 0.2s; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .btn-generate:active { transform: translateY(0); }
+        .payslip-container { display: none; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin-bottom: 30px; animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .payslip-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 40px; position: relative; }
+        .payslip-header::after { content: ''; position: absolute; bottom: -50px; left: 0; right: 0; height: 100px; background: white; border-radius: 50% 50% 0 0; }
+        .company-info h2 { font-size: 28px; margin-bottom: 5px; letter-spacing: 2px; }
+        .company-info p { opacity: 0.8; font-size: 14px; }
+        .payslip-title { font-size: 48px; font-weight: 700; margin-top: 20px; opacity: 0.9; }
+        .stamp { position: absolute; top: 30px; right: 30px; width: 100px; height: 100px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; transform: rotate(-15deg); opacity: 0.6; text-align: center; line-height: 1.2; }
+        .payslip-content { padding: 60px 40px 40px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .info-box { background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #2a5298; }
+        .info-label { font-size: 12px; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .info-value { font-size: 18px; font-weight: 600; color: #2c3e50; }
+        .salary-table { width: 100%; border-collapse: collapse; margin: 30px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .salary-table th { background: #2a5298; color: white; padding: 20px; text-align: left; font-weight: 600; }
+        .salary-table td { padding: 20px; border-bottom: 1px solid #e9ecef; }
+        .salary-table tr:nth-child(even) { background: #f8f9fa; }
+        .amount { text-align: right; font-family: 'Courier New', monospace; font-weight: 600; }
+        .positive { color: #27ae60; }
+        .negative { color: #e74c3c; }
+        .total-row { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white; font-size: 18px; font-weight: 700; }
+        .total-row td { border: none; padding: 25px 20px; }
+        .mpf-section { background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 25px; margin-top: 30px; }
+        .mpf-title { color: #856404; font-weight: 700; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .mpf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .mpf-item { background: white; padding: 15px; border-radius: 8px; border-left: 3px solid #ffc107; }
+        .mpf-label { font-size: 12px; color: #6c757d; margin-bottom: 5px; }
+        .mpf-value { font-size: 16px; font-weight: 700; color: #2c3e50; }
+        .footer-note { margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50; }
+        .payslip-footer { text-align: center; padding: 30px; color: #6c757d; font-size: 12px; border-top: 1px solid #e9ecef; margin-top: 40px; }
+        .btn-print { background: #27ae60; color: white; border: none; padding: 15px 30px; font-size: 16px; font-weight: 600; border-radius: 10px; cursor: pointer; margin-top: 20px; transition: all 0.3s; }
+        .btn-print:hover { background: #229954; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); }
+        @media print { body { background: white; padding: 0; } .form-section, .btn-print, .header { display: none; } .payslip-container { display: block !important; box-shadow: none; margin: 0; } }
+        .preview-label { display: none; text-align: center; color: white; font-size: 24px; margin-bottom: 20px; font-weight: 700; }
+        @media print { .preview-label { display: block; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>木本部有限公司</h1>
+            <p>Mokuhonbu Limited - 糧單生成系統</p>
+        </div>
+        <div class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="employeeName">員工姓名 Employee Name</label>
+                    <input type="text" id="employeeName" placeholder="例如：何燕" value="何燕">
+                </div>
+                <div class="form-group">
+                    <label for="salary">基本薪金 Basic Salary (HK$)</label>
+                    <input type="number" id="salary" placeholder="例如：17000" value="17000">
+                </div>
+                <div class="form-group">
+                    <label for="month">選擇月份 Select Month</label>
+                    <select id="month">
+                        <option value="6">2025 年 6 月 June 2025</option>
+                        <option value="7">2025 年 7 月 July 2025</option>
+                        <option value="8">2025 年 8 月 August 2025</option>
+                        <option value="9">2025 年 9 月 September 2025</option>
+                        <option value="10" selected>2025 年 10 月 October 2025</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="position">職位 Position</label>
+                    <input type="text" id="position" placeholder="例如：全職員工" value="全職員工">
+                </div>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="mpfCheck" checked>
+                <label for="mpfCheck">包含強積金供款 (5%) Include MPF Contribution (5%)</label>
+            </div>
+            <button class="btn-generate" onclick="generatePayslip()">生成糧單 Generate Payslip</button>
+        </div>
+        <div class="preview-label">=== 糧單預覽 PAYSLIP PREVIEW ===</div>
+        <div id="payslipResult" class="payslip-container">
+            <div class="payslip-header">
+                <div class="stamp">已審核<br>APPROVED</div>
+                <div class="company-info">
+                    <h2>木本部有限公司</h2>
+                    <p>Mokuhonbu Limited</p>
+                </div>
+                <div class="payslip-title">糧單 PAYSLIP</div>
+            </div>
+            <div class="payslip-content">
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div class="info-label">員工姓名 Employee Name</div>
+                        <div class="info-value" id="displayName">-</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">糧期 Payroll Period</div>
+                        <div class="info-value" id="displayMonth">-</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">職位 Position</div>
+                        <div class="info-value" id="displayPosition">-</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">發薪日期 Payment Date</div>
+                        <div class="info-value" id="displayDate">-</div>
+                    </div>
+                </div>
+                <table class="salary-table">
+                    <thead>
+                        <tr>
+                            <th>項目 Item</th>
+                            <th style="text-align: right;">金額 Amount (HK$)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salaryBody"></tbody>
+                </table>
+                <div id="mpfSection" class="mpf-section" style="display: none;">
+                    <div class="mpf-title">
+                        <span>💰</span>
+                        <span>強制性公積金供款詳情 Mandatory Provident Fund Details</span>
+                    </div>
+                    <div class="mpf-grid">
+                        <div class="mpf-item">
+                            <div class="mpf-label">僱員供款 Employee Contribution</div>
+                            <div class="mpf-value" id="mpfEmployee">-</div>
+                        </div>
+                        <div class="mpf-item">
+                            <div class="mpf-label">僱主供款 Employer Contribution</div>
+                            <div class="mpf-value" id="mpfEmployer">-</div>
+                        </div>
+                        <div class="mpf-item">
+                            <div class="mpf-label">供款基數 Contribution Base</div>
+                            <div class="mpf-value" id="mpfBase">-</div>
+                        </div>
+                        <div class="mpf-item">
+                            <div class="mpf-label">總供款額 Total Contribution</div>
+                            <div class="mpf-value" id="mpfTotal">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-note">
+                    <strong style="color: #2e7d32;">備註 Remarks：</strong><br>
+                    <span style="color: #555; font-size: 14px;">
+                        此糧單為機密文件，請妥善保管。<br>
+                        This payslip is confidential. Please keep it in a safe place.<br>
+                        如有疑問，請聯絡人力資源部。
+                    </span>
+                </div>
+            </div>
+            <div class="payslip-footer">
+                <p>木本部有限公司 Mokuhonbu Limited</p>
+                <p>此糧單由電腦系統生成，無需簽署 | Generated by Computer System</p>
+                <p style="margin-top: 10px; font-size: 10px;" id="generatedDate">-</p>
+            </div>
+            <div style="text-align: center; padding-bottom: 30px;">
+                <button class="btn-print" onclick="window.print()">打印 / 儲存為 PDF Print / Save as PDF</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const monthNames = {
+            '6': '2025 年 6 月 June 2025',
+            '7': '2025 年 7 月 July 2025',
+            '8': '2025 年 8 月 August 2025',
+            '9': '2025 年 9 月 September 2025',
+            '10': '2025 年 10 月 October 2025'
+        };
+        const monthDays = {
+            '6': '2025 年 6 月 30 日',
+            '7': '2025 年 7 月 31 日',
+            '8': '2025 年 8 月 31 日',
+            '9': '2025 年 9 月 30 日',
+            '10': '2025 年 10 月 31 日'
+        };
+        function formatMoney(amount) {
+            return amount.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        function generatePayslip() {
+            const name = document.getElementById('employeeName').value || '何燕';
+            const salary = parseFloat(document.getElementById('salary').value) || 17000;
+            const month = document.getElementById('month').value;
+            const position = document.getElementById('position').value || '全職員工';
+            const hasMPF = document.getElementById('mpfCheck').checked;
+            document.getElementById('displayName').textContent = name;
+            document.getElementById('displayMonth').textContent = monthNames[month];
+            document.getElementById('displayPosition').textContent = position;
+            document.getElementById('displayDate').textContent = monthDays[month];
+            document.getElementById('generatedDate').textContent = 'Generated on ' + new Date().toLocaleDateString('en-HK');
+            let mpfAmount = 0;
+            let netSalary = salary;
+            if (hasMPF && salary >= 7100) {
+                mpfAmount = salary * 0.05;
+                netSalary = salary - mpfAmount;
+            }
+            let tableHTML = `<tr><td>基本薪金 Basic Salary</td><td class="amount positive">${formatMoney(salary)}</td></tr>`;
+            if (hasMPF && salary >= 7100) {
+                tableHTML += `<tr><td>強積金供款 (僱員部分) MPF Contribution (Employee)</td><td class="amount negative">- ${formatMoney(mpfAmount)}</td></tr>`;
+            }
+            tableHTML += `<tr class="total-row"><td>實發薪金 Net Pay</td><td class="amount">${formatMoney(netSalary)}</td></tr>`;
+            document.getElementById('salaryBody').innerHTML = tableHTML;
+            const mpfSection = document.getElementById('mpfSection');
+            if (hasMPF && salary >= 7100) {
+                mpfSection.style.display = 'block';
+                document.getElementById('mpfEmployee').textContent = '$' + formatMoney(mpfAmount) + ' (5%)';
+                document.getElementById('mpfEmployer').textContent = '$' + formatMoney(mpfAmount) + ' (5%)';
+                document.getElementById('mpfBase').textContent = '$' + formatMoney(salary);
+                document.getElementById('mpfTotal').textContent = '$' + formatMoney(mpfAmount * 2);
+            } else {
+                mpfSection.style.display = 'none';
+            }
+            document.getElementById('payslipResult').style.display = 'block';
+            document.getElementById('payslipResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        window.onload = function() { generatePayslip(); };
+    </script>
+</body>
+</html>
