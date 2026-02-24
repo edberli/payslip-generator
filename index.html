@@ -253,7 +253,7 @@
                     totalNet += netSalary;
                     rowsHTML += `
                         <tr>
-                            <td>${monthNames[month].split(' ')[0]}</td>
+                            <td>${monthNames[month]}</td>
                             <td class="amount positive">${formatMoney(salary)}</td>
                             ${hasMPF && salary >= 7100 ? `<td class="amount negative">-${formatMoney(mpfAmount)}</td>` : ''}
                             <td class="amount"><strong>${formatMoney(netSalary)}</strong></td>
