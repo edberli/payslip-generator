@@ -71,10 +71,20 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>木本部有限公司</h1>
+            <h1 id="headerTitle">木本部有限公司</h1>
             <p>Mokuhonbu Limited - 糧單生成系統</p>
         </div>
         <div class="form-section">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="companyName">公司名稱 Company Name</label>
+                    <input type="text" id="companyName" placeholder="例如：木本部有限公司" value="木本部有限公司" oninput="updateHeader()">
+                </div>
+                <div class="form-group">
+                    <label for="companyEnglish">公司英文名 Company English Name</label>
+                    <input type="text" id="companyEnglish" placeholder="例如：Mokuhonbu Limited" value="Mokuhonbu Limited" oninput="updateHeader()">
+                </div>
+            </div>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="employeeName">員工姓名 Employee Name</label>
@@ -92,6 +102,21 @@
             <div class="form-group" style="margin-bottom: 20px;">
                 <label style="font-weight: 600; color: #2c3e50; margin-bottom: 10px; display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">選擇月份 Select Months (可多選 Multi-select)</label>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="1"> <span>2025 年 1 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="2"> <span>2025 年 2 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="3"> <span>2025 年 3 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="4"> <span>2025 年 4 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="5"> <span>2025 年 5 月</span>
+                    </label>
                     <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
                         <input type="checkbox" class="month-check" value="6" checked> <span>2025 年 6 月</span>
                     </label>
@@ -113,6 +138,24 @@
                     <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0; cursor: pointer;">
                         <input type="checkbox" class="month-check" value="12"> <span>2025 年 12 月</span>
                     </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="13"> <span>2026 年 1 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="14"> <span>2026 年 2 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="15"> <span>2026 年 3 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="16"> <span>2026 年 4 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="17"> <span>2026 年 5 月</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; border: 2px solid #4caf50; cursor: pointer;">
+                        <input type="checkbox" class="month-check" value="18"> <span>2026 年 6 月</span>
+                    </label>
                 </div>
             </div>
             <div class="checkbox-group">
@@ -126,8 +169,8 @@
             <div class="payslip-header">
                 <div class="stamp">已審核<br>APPROVED</div>
                 <div class="company-info">
-                    <h2>木本部有限公司</h2>
-                    <p>Mokuhonbu Limited</p>
+                    <h2>${companyName}</h2>
+                    <p>${companyEnglish}</p>
                 </div>
                 <div class="payslip-title">糧單 PAYSLIP</div>
             </div>
@@ -222,10 +265,18 @@
             '11': '2025 年 11 月 30 日',
             '12': '2025 年 12 月 31 日'
         };
+        function updateHeader() {
+            const companyName = document.getElementById('companyName').value || '木本部有限公司';
+            const companyEnglish = document.getElementById('companyEnglish').value || 'Mokuhonbu Limited';
+            document.getElementById('headerTitle').textContent = companyName;
+        }
+
         function formatMoney(amount) {
             return amount.toLocaleString('en-HK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
         function generatePayslip() {
+            const companyName = document.getElementById('companyName').value || '木本部有限公司';
+            const companyEnglish = document.getElementById('companyEnglish').value || 'Mokuhonbu Limited';
             const name = document.getElementById('employeeName').value || '何燕';
             const salary = parseFloat(document.getElementById('salary').value) || 17000;
             const position = document.getElementById('position').value || '全職員工';
@@ -267,8 +318,8 @@
                     <div class="payslip-header">
                         <div class="stamp">已審核<br>APPROVED</div>
                         <div class="company-info">
-                            <h2>木本部有限公司</h2>
-                            <p>Mokuhonbu Limited</p>
+                            <h2>${companyName}</h2>
+                            <p>${companyEnglish}</p>
                         </div>
                         <div class="payslip-title">糧單匯總表 - ${selectedMonths.length} 個月</div>
                     </div>
@@ -368,8 +419,8 @@
                     <div class="payslip-header">
                         <div class="stamp">已審核<br>APPROVED</div>
                         <div class="company-info">
-                            <h2>木本部有限公司</h2>
-                            <p>Mokuhonbu Limited</p>
+                            <h2>${companyName}</h2>
+                            <p>${companyEnglish}</p>
                         </div>
                         <div class="payslip-title">糧單 PAYSLIP - ${monthNames[month]}</div>
                     </div>
